@@ -18,6 +18,8 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtCore  # QtCore를 명시적으로 보여주기 위해
 from pandas import Series, DataFrame
 import locale
+import ctypes
+
 
 g_instCpCybos = win32com.client.Dispatch("CpUtil.CpCybos")  #1
 g_objCodeMgr = win32com.client.Dispatch("CpUtil.CpCodeMgr") #2
@@ -56,6 +58,42 @@ a_price  = []
 a_ContAmount = []
 #hooseNum = 0
 #buyName = ""
+
+
+
+################################################
+# PLUS 공통 OBJECT
+g_objCodeMgr = win32com.client.Dispatch('CpUtil.CpCodeMgr')
+g_objCpStatus = win32com.client.Dispatch('CpUtil.CpCybos')
+g_objCpTrade = win32com.client.Dispatch('CpTrade.CpTdUtil')
+ 
+ 
+################################################
+# PLUS 실행 기본 체크 함수
+def InitPlusCheck():
+    # 프로세스가 관리자 권한으로 실행 여부
+    if ctypes.windll.shell32.IsUserAnAdmin():
+        print('정상: 관리자권한으로 실행된 프로세스입니다.')
+    else:
+        print('오류: 일반권한으로 실행됨. 관리자 권한으로 실행해 주세요')
+        return False
+ 
+    # 연결 여부 체크
+    if (g_objCpStatus.IsConnect == 0):
+        print("PLUS가 정상적으로 연결되지 않음. ")
+        return False
+ 
+    # 주문 관련 초기화
+    if (g_objCpTrade.TradeInit(0) != 0):
+        print("주문 초기화 실패")
+        return False
+ 
+    return True
+ 
+ 
+################################################
+    
+
 class TestThread(QThread):
     # 쓰레드의 커스텀 이벤트
     # 데이터 전달 시 형을 명시해야 함
@@ -331,9 +369,6 @@ class CpMarketEye:
         # 연결 여부 체크
         objCpCybos = win32com.client.Dispatch("CpUtil.CpCybos")
         bConnect = objCpCybos.IsConnect
-        if (bConnect == 0):
-            print("PLUS가 정상적으로 연결되지 않음. ")
-            return False
  
         # 관심종목 객체 구하기
         objRq = win32com.client.Dispatch("CpSysDib.MarketEye")
@@ -822,11 +857,11 @@ class Form(QtWidgets.QDialog):
         #threading.Thread.__init__(self) 
         super().__init__() 
         self.ui = uic.loadUi("hoga_2.ui", self)
-        if(g_objCpStatus.IsConnect == 0):
-            print("Check Connection")
-            sys.exit()
-        else:
-            print("Connection")
+        
+        #CONNECTIN CHECK
+        if InitPlusCheck() == False:
+            exit()
+    
         self.ui.btn1.clicked.connect(self.threadStart)
         self.ui.btn2.clicked.connect(self.threadStop)
         #self.ui.pushButton_2.clicked.connect(self.pushButton_2action)
