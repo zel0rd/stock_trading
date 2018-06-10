@@ -944,20 +944,20 @@ class Form(QtWidgets.QDialog):
         print("Forecasting data set")
         
         new_dates = []
-        for col in range(len(g_dates)) :
-            val = ''
-            if (col == 0):  # 일자
-                # 20170929 --> 2017/09/29
-                yyyy = int(g_dates[col] / 10000)
-                mm = int(g_dates[col] - (yyyy * 10000))
-                dd = mm % 100
-                mm = mm / 100
-                val = '%04d/%02d/%02d' %(yyyy, mm, dd)
-        new_dates.append(val)
+        for i in range(len(g_dates)):
+            yyyy = int(g_dates[i] / 10000)
+            mm = int(g_dates[i] - (yyyy * 10000))
+            dd = mm % 100
+            mm = mm / 100
+            val = '%04d/%02d/%02d' %(yyyy, mm, dd)
+            new_dates.append(val)
+            
 
         print(g_dates)
         print(g_closes)
         print(new_dates)
+        plt.plot(new_dates,g_closes)
+        plt.show()
         #data = [new_dates,g_closes]
         #newData = np.transpose(data)
         #df = DataFrame(newData,columns=['dates','closes'])
