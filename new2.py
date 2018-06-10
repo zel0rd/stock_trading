@@ -949,7 +949,7 @@ class Form(QtWidgets.QDialog):
             mm = int(g_dates[i] - (yyyy * 10000))
             dd = mm % 100
             mm = mm / 100
-            val = '%04d/%02d/%02d' %(yyyy, mm, dd)
+            val = '%04d-%02d-%02d' %(yyyy, mm, dd)
             new_dates.append(val)
             
 
@@ -957,6 +957,17 @@ class Form(QtWidgets.QDialog):
         print(g_closes)
         print(new_dates)
         plt.plot(new_dates,g_closes)
+        plt.show()
+        
+        d = {'ds':new_dates,'y':g_closes}
+        df = pd.DataFrame(data=d)
+        m = Prophet()
+        m.fit(df)
+        future = m.make_future_dataframe(periods=100)
+        forecast = m.predict(future)
+        m.plot(forecast)
+        plt.show()
+        m.plot_components(forecast)
         plt.show()
         #data = [new_dates,g_closes]
         #newData = np.transpose(data)

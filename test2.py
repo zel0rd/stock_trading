@@ -21,7 +21,7 @@ for i in range(len(g_dates)):
     mm = int(g_dates[i] - (yyyy * 10000))
     dd = mm % 100
     mm = mm / 100
-    val = '%04d/%02d/%02d' %(yyyy, mm, dd)
+    val = '%04d-%02d-%02d' %(yyyy, mm, dd)
     new_dates.append(val)
     
 print(new_dates)
