@@ -20,6 +20,16 @@ from pandas import Series, DataFrame
 import locale
 import ctypes
 
+import pandas as pd
+from pandas import DataFrame
+import numpy as np
+import matplotlib.pyplot as plt
+
+from fbprophet import Prophet
+from datetime import datetime
+
+
+
 
 g_instCpCybos = win32com.client.Dispatch("CpUtil.CpCybos")  #1
 g_objCodeMgr = win32com.client.Dispatch("CpUtil.CpCodeMgr") #2
@@ -50,6 +60,11 @@ g_price2=[]
 g_buycode=0
 
 #미체결조회
+
+g_dates = []
+g_closes = []
+
+
 a_code  = []
 a_name  = []
 a_orderDesc = []
@@ -553,13 +568,17 @@ class CpWeekList:
                 foreign_vols.append(self.objWeek.GetDataValue(7, i)) # 외인보유
                 foreign_diff.append(self.objWeek.GetDataValue(8, i)) # 외인보유 전일대비
                 foreign_p.append(self.objWeek.GetDataValue(9, i)) # 외인비중
-
-            if (sumCnt > 100):
+                
+            if (sumCnt > 250):
                 break
 
             if self.objWeek.Continue == False:
                 break
 
+        global g_dates,g_closes
+        g_dates = dates
+        g_closes = closes
+        
         if len(dates) == 0:
             return False
 
@@ -880,6 +899,7 @@ class Form(QtWidgets.QDialog):
         
         self.comboBox_4.currentIndexChanged.connect(self.comboChanged)
         self.ui.pushButton_6.clicked.connect(self.pushButton_6clicked)
+        self.ui.pushButton_7.clicked.connect(self.pushButton_7clicked)
        # self.ui.pushButton_7.clicked.connect(self.pushButton_7clicked)
         
         
@@ -919,7 +939,31 @@ class Form(QtWidgets.QDialog):
     #    self.CpUtil.CpCybos::PlusDisconnect
     
     ###엑셀출력
- #   def pushButton_7clicked(self):
+    
+    def pushButton_7clicked(self):
+        print("Forecasting data set")
+        
+        new_dates = []
+        for col in range(len(g_dates)) :
+            val = ''
+            if (col == 0):  # 일자
+                # 20170929 --> 2017/09/29
+                yyyy = int(g_dates[col] / 10000)
+                mm = int(g_dates[col] - (yyyy * 10000))
+                dd = mm % 100
+                mm = mm / 100
+                val = '%04d/%02d/%02d' %(yyyy, mm, dd)
+        new_dates.append(val)
+
+        print(g_dates)
+        print(g_closes)
+        print(new_dates)
+        #data = [new_dates,g_closes]
+        #newData = np.transpose(data)
+        #df = DataFrame(newData,columns=['dates','closes'])
+        #print(df)
+        #plt.plot(g_dates,g_closes)
+        #plt.show()
         
         
     #전략 정보조회
