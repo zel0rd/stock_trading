@@ -74,6 +74,8 @@ a_ContAmount = []
 #hooseNum = 0
 #buyName = ""
 
+d_code = []
+d_name = []
 
 
 ################################################
@@ -569,16 +571,40 @@ class CpWeekList:
                 foreign_diff.append(self.objWeek.GetDataValue(8, i)) # 외인보유 전일대비
                 foreign_p.append(self.objWeek.GetDataValue(9, i)) # 외인비중
                 
-            if (sumCnt > 250):
+            if (sumCnt > 300):
+                break
+
+            if self.objWeek.Continue == False:
+                break
+        """
+        sumCnt2 = 0
+        dates1 = []
+        closes1 = []
+        while True:
+
+            cnt = self.objWeek.GetHeaderValue(1)
+            sumCnt2 += cnt
+            if cnt == 0:
+                break
+
+            for i in range(cnt):
+                dates1.append(self.objWeek.GetDataValue(0, i))
+                closes1.append(self.objWeek.GetDataValue(4, i))
+
+               
+            if (sumCnt2 > 1000):
                 break
 
             if self.objWeek.Continue == False:
                 break
 
         global g_dates,g_closes
+        g_dates = dates1
+        g_closes = closes1
+        """
+        global g_dates,g_closes
         g_dates = dates
         g_closes = closes
-        
         if len(dates) == 0:
             return False
 
@@ -941,7 +967,6 @@ class Form(QtWidgets.QDialog):
     ###엑셀출력
     
     def pushButton_7clicked(self):
-        print("Forecasting data set")
         
         new_dates = []
         for i in range(len(g_dates)):
@@ -951,14 +976,24 @@ class Form(QtWidgets.QDialog):
             mm = mm / 100
             val = '%04d-%02d-%02d' %(yyyy, mm, dd)
             new_dates.append(val)
-            
-
-        print(g_dates)
-        print(g_closes)
-        print(new_dates)
+        
+        global d_code,d_name
+        
+        
+        #print data set
+        print("\n\n\n\n\n" + d_code + "(" + d_name + ") : " + "Data Sets")
+        t = {'dates' : new_dates, 'closes' : g_closes}
+        tf = pd.DataFrame(data=t)
+        print(tf)
+        #print(g_closes)
+        #print(new_dates) 
+        
         plt.plot(new_dates,g_closes)
         plt.show()
         
+        
+        #Time series forecast
+        print("\n\n\n\n\nTime series forecast")
         d = {'ds':new_dates,'y':g_closes}
         df = pd.DataFrame(data=d)
         m = Prophet()
@@ -969,12 +1004,43 @@ class Form(QtWidgets.QDialog):
         plt.show()
         m.plot_components(forecast)
         plt.show()
-        #data = [new_dates,g_closes]
-        #newData = np.transpose(data)
-        #df = DataFrame(newData,columns=['dates','closes'])
-        #print(df)
-        #plt.plot(g_dates,g_closes)
-        #plt.show()
+        
+        
+        #Saturating forecast
+        print("\n\n\n\n\nSaturating forecast")
+        df['cap'] = g_closes[0]
+        m = Prophet(growth='logistic')
+        m.fit(df)
+        
+        future = m.make_future_dataframe(periods=10)
+        future['cap'] = g_closes[0]
+        fcst = m.predict(future)
+        m.plot(fcst)
+        plt.show()
+        
+        #Adjusting trend flexibility
+        print("\n\n\n\n\nAdjusting trend flexibility")
+        m = Prophet(changepoint_prior_scale=0.5)
+        forecast = m.fit(df).predict(future)
+        m.plot(forecast)
+        plt.show()
+        
+        #Outliers
+        print("\n\n\n\n\nOutliers")
+        m = Prophet()
+        m.fit(df)
+        future = m.make_future_dataframe(periods=100)
+        forecast = m.predict(future)
+        m.plot(forecast)
+        plt.show()
+         
+        #Sub-daily data
+        print("\n\n\n\n\nSub-daily data")
+        m = Prophet(changepoint_prior_scale=1).fit(df)
+        future = m.make_future_dataframe(periods=300, freq='H')
+        fcst = m.predict(future)
+        m.plot(fcst)
+        plt.show()
         
         
     #전략 정보조회
@@ -1228,9 +1294,14 @@ class Form(QtWidgets.QDialog):
         if len(name) == 0:
             print("종목코드 확인")
             return
-
+            
+        global d_code, d_name
+        d_code = code
+        d_name = name
+        
         self.ui.label_name.setText(name)
-
+        
+        
         if (self.objMst.Request(code, self.item, self) == False):
             return
         self.displyHoga()
