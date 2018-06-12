@@ -948,7 +948,8 @@ class Form(QtWidgets.QDialog):
         self.objStockBid = CpStockBid()
         self.todayIndex = 0
 
-        self.setCode("005930")
+        #self.setCode("005930")
+        self.setCode("002240")
                  
         
         self.th = TestThread(self)
@@ -992,10 +993,21 @@ class Form(QtWidgets.QDialog):
         plt.show()
         
         
-        #Time series forecast
-        print("\n\n\n\n\nTime series forecast")
+        print("2017 Data Set")
         d = {'ds':new_dates,'y':g_closes}
         df = pd.DataFrame(data=d)
+        df_temp = df.drop(df.index[0:100])
+        m = Prophet()
+        m.fit(df_temp)
+        future = m.make_future_dataframe(periods=100)
+        forecast = m.predict(future)
+        m.plot(forecast)
+        plt.show()
+        
+        
+        #Time series forecast
+        print("\n\n\n\n\nTime series forecast")
+        
         m = Prophet()
         m.fit(df)
         future = m.make_future_dataframe(periods=100)
