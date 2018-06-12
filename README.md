@@ -1,8 +1,14 @@
-# Data-Analysis
-Data Analysis Using Python and a little R. 
+# Python Trading-System (Cybos Plus API)
 
-A place to share my code and reports for various data science projects.
+## Anaconda-32bit
+if you want to you DaeShin API, you need anaconda 32bit. (have to use "win32com.client")
 
-Many of these projects are written up on my [Towards Data Science Medium page](https://medium.com/@williamkoehrsen). 
+## Spyder (Administrator rights)
 
-Reach me on Twitter [@koehrsen_will](https://twitter.com/@koehrsen_will)
+## Install packages
+
+
+ 
+ 
+
+zelord.kwoun@gmail.com
