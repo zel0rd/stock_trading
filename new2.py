@@ -980,6 +980,8 @@ class Form(QtWidgets.QDialog):
         
         global d_code,d_name
         
+        new_dates.reverse()
+        g_closes.reverse()
         
         #print data set
         print("\n\n\n\n\n" + d_code + "(" + d_name + ") : " + "Data Sets")
@@ -996,7 +998,7 @@ class Form(QtWidgets.QDialog):
         print("2017 Data Set")
         d = {'ds':new_dates,'y':g_closes}
         df = pd.DataFrame(data=d)
-        df_temp = df.drop(df.index[0:100])
+        df_temp = df.drop(df.index[100:])
         m = Prophet()
         m.fit(df_temp)
         future = m.make_future_dataframe(periods=100)
@@ -1007,7 +1009,6 @@ class Form(QtWidgets.QDialog):
         
         #Time series forecast
         print("\n\n\n\n\nTime series forecast")
-        
         m = Prophet()
         m.fit(df)
         future = m.make_future_dataframe(periods=100)
@@ -1775,3 +1776,6 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     w =Form()
     app.exec_()
+    
+    
+    
